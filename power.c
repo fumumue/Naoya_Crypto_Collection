@@ -1920,13 +1920,6 @@ vec chen(vec f)
     return e;
 }
 
-typedef struct
-{
-    vec f;
-    vec g;
-    vec h;
-} ymo;
-
 
 vec bms( int s[])
 {
