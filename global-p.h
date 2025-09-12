@@ -9,7 +9,7 @@
 #define M N // puncture code
 #define K (32) // degree of polynomial
 #define E (11)   // bit size of prime
-#define DEG N*2 // set (K * E) < N
+#define DEG N*K // set (K * E) < N
 #define T (K / 2) // weight of error vector
 #define Q K*2
 
