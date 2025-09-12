@@ -300,9 +300,6 @@ vec convolution( vec a, vec b, int n ) {
 }
 
 
- int vb[K * 2][N] = {0};
- int gt[K * 2][K * 2] = {0};
-
  // RS-Code generater
  void van(int kk)
  {
@@ -3208,13 +3205,8 @@ MTA B={0};
     vec t={0};
     //mkerr(t.x,T);
     
-    t.x[0]=1;
-    t.x[1]=1;
-    t.x[2]=1;
-    t.x[3]=1;
-    t.x[4]=1;
-    t.x[5]=1;
-    t.x[6]=1;
+    for(i=0;i<N;i++)
+    t.x[i]=1;
     
     vec vx=vadd(f,t);
     list(t);
