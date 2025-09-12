@@ -1889,6 +1889,20 @@ vec synd( int zz[], int kk)
     return f;
 }
 
+
+int ink(int vx){
+
+    for(int i=0;i<N-1;i++){
+    if((vx)==mltn(i,3)){
+        return i;
+        }
+    }
+    exit(1);
+    //return N-1;
+}
+
+
+
 // chen探索
 vec chen(vec f)
 {
@@ -2689,16 +2703,8 @@ fair soka(){
 return kubi;
 }
 
-int ink(int vx){
 
-    for(int i=0;i<N-1;i++){
-    if((vx)==mltn(i,3)){
-        return i;
-        }
-    }
-    exit(1);
-    //return N-1;
-}
+
 
 vec msm(vec err){
 int i,l;
@@ -3077,13 +3083,13 @@ int main()
         B.x[i][j]=rand()%N;
     }
 
-    matinv(A,&inv_A,K);
+    //matinv(A,&inv_A,K);
     renritu(A,K);
-    sankaku(A,K);
+    //sankaku(A,K);
     //exit(1);
 
     cipher();
-    //exit(1);
+    exit(1);
 
     //for(i=0;i<K;i++)
     //on.d[i]=rotr(on.d[i],17);

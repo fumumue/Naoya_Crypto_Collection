@@ -11,7 +11,6 @@
 #include "global-p.h"
 #include "struct.h"
 #include "chash-p.c"
-#include "func.c"
 
 
 
@@ -50,6 +49,9 @@ vec i2v(unsigned int n)
 {
     vec v = {0};
     int i = 0;
+
+    //if(n==0)
+    //exit(1);
 
     while (n > 0)
     {
@@ -145,7 +147,7 @@ unsigned long long  gcd(unsigned long long  a, unsigned long long  b)
   if(b!=1)
   {
     printf("(a,b)!=1\n");
-    return -1;
+    //return -1;
   }
 
   return b;
@@ -157,9 +159,10 @@ unsigned long long  gcd(unsigned long long  a, unsigned long long  b)
 unsigned long long  inv(unsigned long long  a, unsigned long long  n)
 {
 
+    a%=N;
     if(a==0)
     return 0;
-    if(gcd(a,n)!=1){
+    if(gcd(a,n)!=1 ){
         printf("(a,n)!=1:%lld %lld\n",a,n);
         return -1;
     }
@@ -305,6 +308,56 @@ vec vterml(vec f, oterm t)
     //  assert(op_verify(h));
     return h;
 }
+
+
+
+// 20200816:正規化したいところだがうまく行かない
+// 多項式の足し算
+vec vsub(vec a, vec b)
+{
+    vec c = {0};
+    // int i, j, k, l = 0;
+    vec h = {0}, f2 = {0}, g2 = {0};
+
+    for (int i = 0; i < DEG; i++)
+    {
+        if (a.x[i] >= b.x[i])
+            c.x[i] = (a.x[i] - b.x[i]) % N;
+        if (a.x[i] < b.x[i])
+            c.x[i] = (N + a.x[i] - b.x[i]) % N;
+    }
+
+    return c;
+}
+
+
+int mul = 0, mul2 = 0;
+vec vmul(vec a, vec b,int R)
+{
+    int i, j, k, l;
+    vec c = {0};
+
+    k = deg(a);
+    l = deg(b);
+
+    if(l+k>N*2){
+        printf("blake %d a=%d b=%d\n",l+k,deg(a),deg(b));
+        //exit(1);
+    }
+    i = 0;
+    while (i < k + 1)
+    {
+        for (j = 0; j < l + 1; j++)
+        {
+            if (a.x[i] > 0)
+                c.x[i + j] = (c.x[i + j] + a.x[i] * b.x[j]) % R;
+        }
+        i++;
+    }
+
+    return c;
+}
+
 
 //多項式の商を取る
 vec vdiv(vec f, vec g)

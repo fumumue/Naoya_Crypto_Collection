@@ -539,8 +539,9 @@ int mltn(int n, int x)
 {
   if (n == 0)
     return 1;
-  if(n==N-1)
-  exit(1);
+  if(x==0)
+  return 0;
+  //exit(1);
   //return -1;
   int ret = 1;
   while (n > 0)

@@ -591,13 +591,13 @@ vec renritu(MTX a, int n)
   
   for (i = 0; i < n; i++) {
     p = a.x[i][i];
-    a.x[i][i]=(a.x[i][i]*inv(p,N))%N;
+    a.x[i][i]=(a.x[i][i]*inverse(p,N))%N;
     if(p==0){
       printf("Uh! 0\n");
       exit(1);
     }
     for (j = i+1; j < (n + 1); j++) {
-      a.x[i][j] = a.x[i][j]*inv(p,N)%N;
+      a.x[i][j] = a.x[i][j]*inverse(p,N)%N;
     }
     //上三角
     for (j = i+1; j < n; j++) {
@@ -648,7 +648,7 @@ MTX sankaku(MTX a, int n)
 
   for(i=0;i<n;i++){
     for(j=0;j<n+1;j++)
-    printf("%d,",a.x[i][j]);
+    printf("c%d,",a.x[i][j]);
   printf("\n");
   }
   printf("\n");
@@ -658,21 +658,25 @@ MTX sankaku(MTX a, int n)
     a.x[i][i]=(a.x[i][i]*inv(p,N))%N;
     if(p==0){
       vec tmp={0};
-    
+      printf("p-e\n");
+    exit(1);
     for(int ii=0;ii<n+1;ii++)
     tmp.x[ii]=a.x[i][ii];
     for(int ii=0;ii<n+1;ii++)
-    a.x[i][(ii)]=a.x[i+1][ii];
+    a.x[i][(ii)]=(a.x[i+1][ii])%N;
     for(int ii=0;ii<n+1;ii++)
     a.x[i+1][ii]=tmp.x[ii];
 
     for(int ii=0;ii<n;ii++)
     tmp.x[ii]=a.x[ii][i];
     for(int ii=0;ii<n;ii++)
-    a.x[ii][i]=a.x[ii][i+1];
+    a.x[ii][i]=(a.x[ii][i+1])%N;
     for(int ii=0;ii<n;ii++)
     a.x[ii][i+1]=tmp.x[ii];
+  if(a.x[i][i]==0){
       printf("Uh! 0 (%d,)\n",i);
+  exit(1);
+    }
       goto back;
       //exit(1);
     }
@@ -688,7 +692,6 @@ MTX sankaku(MTX a, int n)
           a.x[j][k] = (N+(a.x[j][k] - d*a.x[i][k]%N));
         }
     }
-    
     for(int t=0;t<n;t++){
       for(int u=0;u<n+1;u++){
         b.z[t].x[u]=a.x[t][u]%N;
@@ -697,6 +700,7 @@ MTX sankaku(MTX a, int n)
     printf("\n");
     }
     printf("\n");
+
     /*
     //下三角
     for (j = i+1; j > -1; j--) {
@@ -710,7 +714,8 @@ MTX sankaku(MTX a, int n)
     }
     */
   }
-
+  //exit(1);
+  
 
   return b;
 }

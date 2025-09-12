@@ -229,7 +229,7 @@ unsigned son[2048]={
 
 
 /* [23,12,7]-�g���S�[���C���� */
-static short gtc[23]={
+static int gtc[23]={
 0b10000000000,
 0b01000000000,
 0b00100000000,
@@ -311,39 +311,6 @@ int xorshift32(){
 }
 
 
-void test(){
-  unsigned int x,i,j,b,bb,l,m,n;
-  poly p,p_low;
-  char t[11];
-  
-  
-  for(j=0;j<11;j++){
-    for(i=0;i<23;i++){
-      l=ht[i]; 
-      printf("%d",bit(l,j));
-    }
-    printf("\n");
-  }
-  
-      for(j=0;j<11;j++){
-        for(i=0;i<23;i++)
-        {
-            m=ht[j];
-      printf("%d",bit2(m,i));
-    }
-    printf("\n");
-  }
-  //exit(1);
-  
-  int s=0;
-  for(i=0;i<11;i++){
-    s+= __builtin_popcount(g2[i]&ht[i]);
-  }
-    printf("ss-20=%d\n",s%2);
-
-}
-
-
 unsigned int m(unsigned int y, unsigned int z)
 {
   unsigned int c;
@@ -390,7 +357,7 @@ void divide(poly a,poly a_low,poly b,poly b_low)
 void rev(unsigned int n)
 {
   char s;
-  unsigned short r=31,count=0;
+  unsigned int r=31,count=0;
   unsigned int k=0,o,p;
   
   while(n>0){
@@ -455,7 +422,7 @@ int bit2(int n,int k)
 
 }
 
-short cb(unsigned int x)
+int cb(unsigned int x)
 {
   int i,j;
 
@@ -464,6 +431,39 @@ short cb(unsigned int x)
     x=(x>>1); i++;
   }
   return i;
+
+}
+
+
+void test(){
+  unsigned int x,i,j,b,bb,l,m,n;
+  poly p,p_low;
+  char t[11];
+  
+  
+  for(j=0;j<11;j++){
+    for(i=0;i<23;i++){
+      l=ht[i]; 
+      printf("%d",bit(l,j));
+    }
+    printf("\n");
+  }
+  
+      for(j=0;j<11;j++){
+        for(i=0;i<23;i++)
+        {
+            m=ht[j];
+      printf("%d",bit2(m,i));
+    }
+    printf("\n");
+  }
+  //exit(1);
+  
+  int s=0;
+  for(i=0;i<11;i++){
+    s+= __builtin_popcount(g2[i]&ht[i]);
+  }
+    printf("ss-20=%d\n",s%2);
 
 }
 
