@@ -21,7 +21,7 @@
 #define MATRIX_SIZE K
 #define SHM_KEY 128
 
-#define Prim 2
+#define Prim 3
 
 int g[K + 1] = {0};
 
@@ -364,16 +364,12 @@ vec convolution( vec a, vec b, int n ) {
          }
          printf("\n");
     }
-        for(i=0;i<N+1;i++)
-        mat[i][N-T]=v.x[i];
-        
-        for(int j=N-T+1;j<N+1;j++){
+    for(j=0;j<T+1;j++){
         for(i=0;i<N;i++){
-            printf("%d,",mat[i][N-T+1]);
-         mat[i][j]=mat[i][N-T]*mltn(j-N+T,mat[i][1])%N;
+        mat[i][N-T+j]=v.x[i]*mltn(j,mat[i][1])%N;
         }
-        printf("\n");
     }
+    
 
     printf("mat=\n");
     for(i=0;i<N;i++){
@@ -390,7 +386,8 @@ vec convolution( vec a, vec b, int n ) {
            printf("\n");
             }
             printf("\n");
-   }
+//exit(1);
+}
  
 
 /*
@@ -3054,8 +3051,8 @@ void dmd(MTX bb){
     printf("%d,",uec.x[N-i]);
     }
     printf("\n");
-    printpoln(ucc);
     printpoln(uec);
+    printpoln(ucc);
     printf("\n");
     //exit(1);
 
@@ -3211,16 +3208,16 @@ MTA B={0};
     vec t={0};
     //mkerr(t.x,T);
     
-    t.x[0]=0;
+    t.x[0]=1;
     t.x[1]=1;
-    t.x[2]=0;
-    t.x[3]=0;
-    t.x[4]=0;
-    //t.x[5]=6;
-    //t.x[6]=1;
+    t.x[2]=1;
+    t.x[3]=1;
+    t.x[4]=1;
+    t.x[5]=1;
+    t.x[6]=1;
     
     vec vx=vadd(f,t);
-    list(vx);
+    list(t);
     for(i=0;i<N;i++){
         for(int j=0;j<N+1;j++){
         A.x[i][j]=mat[i][j];
