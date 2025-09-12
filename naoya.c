@@ -3210,6 +3210,7 @@ MTA B={0};
     
     vec vx=vadd(f,t);
     list(t);
+    //exit(1);
     for(i=0;i<N;i++){
         for(int j=0;j<N+1;j++){
         A.x[i][j]=mat[i][j];
