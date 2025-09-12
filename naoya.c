@@ -365,12 +365,12 @@ vec convolution( vec a, vec b, int n ) {
          printf("\n");
     }
         for(i=0;i<N+1;i++)
-        mat[i][N-T+1]=v.x[i];
+        mat[i][N-T]=v.x[i];
         
         for(int j=N-T+1;j<N+1;j++){
         for(i=0;i<N;i++){
             printf("%d,",mat[i][N-T+1]);
-         mat[i][j+1]=mat[i][N-T+1]*mltn(j-N+T,mat[i][1])%N;
+         mat[i][j]=mat[i][N-T]*mltn(j-N+T,mat[i][1])%N;
         }
         printf("\n");
     }
@@ -587,7 +587,7 @@ trace(vec f, unsigned int x)
     {
         if (v.x[i] > 0){
             u = (u + (v.x[i] * mltn(i, x))) % N;
-            printf("u%d %d\n",u,i);
+            //printf("u%d %d\n",u,i);
         }
     }
 
@@ -2832,7 +2832,7 @@ int i;
 vec sin={0};
 
 printf("blahut\n");
-for(i=0;i<K;i++)
+for(i=1;i<K+1;i++)
     sin.x[i-1]=trace(e,mltn(i,Prim));
 
     return sin;
@@ -2871,11 +2871,11 @@ vec L3(vec f){
         ff[count].x[0]=N-mltn(f.x[count],Prim);
         ff[count++].x[1]=1;
 
-        if(count==K)
+        if(count==N-K)
         break;
     }
     g0.x[0]=1;
-    for(i=0;i<K/2;i++)
+    for(i=0;i<N-K;i++)
     g0=vmul(g0,ff[i],N);
 
     return g0;
@@ -3073,7 +3073,7 @@ void dmd(MTX bb){
     //if(deg(a)==0 && vLT(a).a>0)
     //b=kof2(vLT(a).a,b);
     for(i=0;i<N;i++)
-    printf("sy%d,",((trace(b,i))%N));
+    printf("sy%d,",((N-trace(b,(i+1)%N))%N));
     printf("\n");
   
     //exit(1);
@@ -3086,11 +3086,12 @@ vec c={0};
 
 for(j=0;j<N;j++){
     for(k=0;k<K;k++)
-        c.x[j]+=mm.x[k]*mat[k][j];
+        c.x[j]+=mm.x[k]*vb[k][j];
         c.x[j]%=N;
         printf("%d,",c.x[j]);
 }
-    printf("\n");
+    printf("\n veck= ");;
+    printpoln(c);
 
 return c;
 }
@@ -3102,7 +3103,7 @@ vec konv(vec mm){
 
     for(i=0;i<N;i++){
         printf("tr%d,",(trace(mm,((i+1)%N)))%N);
-        f.x[i]=(trace(mm,((i)%N)))%N;
+        f.x[i]=(trace(mm,((i+1)%N)))%N;
     }
     printf("\n konv= ");
     printpoln(f);
@@ -3152,13 +3153,10 @@ MTA B={0};
     //for(i=0;i<N;i++)
     v.x[3]=1;
     for(i=0;i<N;i++)
-    printf("%d,",trace(v,mltn(i,2)));
+    printf("%d,",trace(v,mltn(i,Prim)));
     printf("\n");
-    list(v);
-    exit(1);
-
-    g0=keygen();
-
+    //list(v);
+    //exit(1);
     //for(i=0;i<K-1;i++)
     //mm.x[i]=rand()%2;
     
@@ -3169,8 +3167,21 @@ MTA B={0};
     vec vc={0}; //vmul(mm,v,N);
     //vc=vadd(vc,vmod(vc,g0));
     
-    mm.x[0]=0; //rand()%2;
-    mm.x[K-1]=1;
+    mm.x[0]=rand()%N;
+    mm.x[1]=rand()%N;
+    vec L={0};
+    for(i=0;i<N-K;i++)
+    L.x[i]=i+1;
+    g0=L3(L); //keygen();
+    printf("g0=\n");
+    printpoln(g0);
+    printf("code=\n");
+    printpoln(vmul(mm,g0,N));
+    printpoln(mm);
+    (vecky(mm));
+    (konv(mm));
+    printpoln(vmul(mm,g0,N));
+    //exit(1);
 
     for(i=0;i<N;i++){
         vc.x[i]=0;
@@ -3195,13 +3206,13 @@ MTA B={0};
         printf("trf %d,",trace(mm,(i+1)%N));
     }
     printf("\n");
-    exit(1);
+    //exit(1);
 
     vec t={0};
     //mkerr(t.x,T);
     
-    t.x[0]=1;
-    t.x[1]=0;
+    t.x[0]=0;
+    t.x[1]=1;
     t.x[2]=0;
     t.x[3]=0;
     t.x[4]=0;
@@ -3224,7 +3235,7 @@ MTA B={0};
     dmd(bb);
     printf("code=\n");
     printf("mm= ");
-    printpoln(cv);
+    printpoln(vx);
     //printf("f+e= ");
     //printpoln(vx);
     printf("f= ");
@@ -3245,7 +3256,7 @@ MTA B={0};
     printpoln(vc);
     vec xv=vmul(mm,g0,N);
     printpoln(xv);
-    exit(1);
+    //exit(1);
 
     vec vv={0};
     for(i=0;i<N;i++)
@@ -3258,7 +3269,7 @@ MTA B={0};
     printpoln(xv);
     printpoln(t);
     //list(vc);
-    exit(1);
+    //exit(1);
 
     vec vb=xv; //vadd(t,vc);
     list(vc);
@@ -3279,31 +3290,32 @@ MTA B={0};
     printpoln(xv);
     printpoln(t);
     //monde(N);
-    exit(1);
+    //exit(1);
 
     //printpoln(vc);
     //exit(1);
-    //mkerr(cc.x,T);
-    for(i=0;i<T;i++)
-    cc.x[i]=1;
+    mkerr(cc.x,T);
+    //for(i=0;i<T;i++)
+    //cc.x[3]=1;
     printf("AI\n");
-    vec r=vadd(cc,vc); //zind(vadd(cc,vc));
+    vec r=vadd(cc,xv); //zind(vadd(cc,vc));
     printpoln(r);
     printf("Ah!\n");
     MTX Z={0}; //sankaku(monde(r,N),N);
     printpoln(vc);
     printf("aa!\n");
+    /*
     for(i=0;i<N;i++){
    Z.z[i]=printrev(Z.z[i],i);
    printpoln(Z.z[i]);
     }
-    sankaku(Z,N);
+    //sankaku(Z,N);
     //itiji(Z.z);
-    exit(1);
-
+    //exit(1);
+    */
     ymo o0=bm_itr(zind(r).x);
     chen(o0.f);
-    for(i=0;i<T;i++)
+    for(i=0;i<N;i++)
     printf("%d,%d\n",i,cc.x[i]);
     printf("\n");
     printpoln(r);
