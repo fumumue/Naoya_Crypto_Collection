@@ -14,7 +14,7 @@
 #include "golay.c"
 #include "hqc_golay.c"
 #include "inv_mat.c"
-//#include "func.c"
+#include "17.c"
 
 
 #define SEPARABLE 0
@@ -335,10 +335,10 @@ vec convolution( vec a, vec b, int n ) {
         printf("\n");
          }
          printf("\n");
-        
+
          //exit(1);
  }
- 
+
 
  // RS-List Decoder
  void list(vec v)
@@ -366,7 +366,7 @@ vec convolution( vec a, vec b, int n ) {
         mat[i][N-T+j]=v.x[i]*mltn(j,mat[i][1])%N;
         }
     }
-    
+
 
     printf("mat=\n");
     for(i=0;i<N;i++){
@@ -385,7 +385,7 @@ vec convolution( vec a, vec b, int n ) {
             printf("\n");
 //exit(1);
 }
- 
+
 
 /*
  // RS-Code generater
@@ -415,7 +415,7 @@ vec convolution( vec a, vec b, int n ) {
         {
             for (i = 0; i < K; i++)
             {
-                    //A.x[j-1][i+N-T] 
+                    //A.x[j-1][i+N-T]
              y.x[j-1]+= mltn(i,j)*x.x[i]%N;
              // mat[i-1][j-1] = vb[i-1][j];
              printf("A%d,%d %d %d\n",mltn(i,j),x.x[j-1],i,j);
@@ -1945,6 +1945,78 @@ vec pmul(vec a, vec b)
 }
 
 
+// simple_bm.c -- 安全な BM 実装（vec ベース）
+// 前提: vec 型と vmul, vadd, vsub, deg, coeff access (v.x[i]) がある。
+//       体の法は MOD (例: q), inv(a, MOD) が利用可能。
+// 入力:  s[0..Slen-1]  (シンドローム, Slen は与える長さ)
+// 出力:  f (誤り位置多項式) を vec として返す (次数は返り値で伝えても可)
+
+int bm_vec(const unsigned int *s, int Slen, vec *out_f) {
+    // C(x) と B(x) を vec で持つ。C は現在の Λ, B は直前のコピー
+    vec C = {0}, B = {0}, Tt = {0};
+    // 初期: C(x) = 1, B(x) = 1
+    C.x[0] = 1;
+    B.x[0] = 1;
+
+    int L = 0;          // 現在の Λ の次数
+    int m = 1;          // シフト量
+    unsigned int b = 1; // 最後に使った不一致量（discrepancy）
+
+    for (int n = 0; n < Slen; n++) {
+        // discrepancy d = S[n] + sum_{i=1..L} C[i]*S[n-i]
+        int d = s[n] % N; // N は体の法（例: q）
+        for (int i = 1; i <= L; i++) {
+            if (C.x[i] == 0) continue;
+            int idx = n - i;
+            if (idx < 0) break; // S[n-i] が無ければ 0 と仮定（あるいはSlenを確保しておく）
+            d = (d + (C.x[i] * s[idx])) % N;
+        }
+        d = (d % N + N) % N;
+
+        if (d == 0) {
+            m++;
+        } else {
+            // T = C (backup)
+            memcpy(&Tt, &C, sizeof(vec));
+            // C = C - (d/b) * x^m * B
+            int coef = (d * inv(b, N)) % N; // invはmod逆元
+            // shift B by m: compute tmp = x^m * B
+            vec tmp = {0};
+            for (int i = 0; i <= deg(B); i++) {
+                if (B.x[i] == 0) continue;
+                tmp.x[i + m] = (B.x[i]) % N;
+            }
+            // scale tmp by coef and subtract from C: C = C - coef*tmp
+            for (int i = 0; i < DEG; i++) {
+                if (tmp.x[i] == 0) continue;
+                // C.x[i] = (C.x[i] - coef*tmp.x[i]) mod N
+                int v = (C.x[i] - coef * tmp.x[i]) % N;
+                if (v < 0) v += N;
+                C.x[i] = v;
+            }
+
+            if (2 * L <= n) {
+                // B = T, b = d, L = n+1-L, m = 1
+                memcpy(&B, &Tt, sizeof(vec));
+                b = d % N;
+                int newL = n + 1 - L;
+                L = newL;
+                m = 1;
+            } else {
+                m++;
+            }
+        }
+    } // end for n
+
+    // 結果: C が Λ(x) の係数を持つ（定数項 C.x[0] = 1）
+    // 正常化: 係数を mod N で整える
+    for (int i = 0; i < DEG; i++) if (C.x[i]) C.x[i] = (C.x[i] % N + N) % N;
+
+    // 出力
+    memcpy(out_f, &C, sizeof(vec));
+    return L; // Λ の次数
+}
+
 ymo bm_itr(unsigned int s[])
 {
     vec U1[2][2] = {0}, U2[2][2][2] = {0}, null = {0};
@@ -2302,64 +2374,6 @@ vec shiftRotateR(vec f) {
 
 int mod(int x, int R){
     return ((x % R) + R) % R;
-}
-
-//pieko
-vec inverse_prime( vec r, vec a, int p ) {
-    int nn = deg(a);
-
-    // Initialization:
-    // k=0, b(X) = 1, c(X) = 0, f(X)=a(X), g(X)=X^N-1
-    int k = 0;
-    vec b = {0}; b.x[0] = 1;
-    vec c = {0};
-    vec f = {0}; //copy_mod( f, a, p );
-    vec g = {0}; g.x[K] = 1; g.x[0] = (p-1);
-
-    while( 1 ) {
-
-
-        while ( f.x[0] == 0  && deg( f ) > 0 ) {
-            f=shiftRotateR(f);
-            c=shiftRotateL(c);
-            k++;
-       }
-        if ( deg( f ) == 0) {
-            int f0Inv = inv( f.x[0], p );
-            if (f0Inv == 0)
-                exit(1);
-            int shift = mod( N-k, N );
-            for (int i=0; i<N; i++)
-                r.x[(i+shift) % N] = mod(f0Inv * b.x[i], p);
-            printpol(r);
-            printf(" ==r\n");
-            return r;
-        }
-        vec t={0};
-        if( deg( f ) < deg( g ) ) {
-            t=f;
-            f=g;
-            g=t;
-            t=b;
-            b=c;
-            c=t;
-        }
-
-        int g0Inv = inv( g.x[0], p );
-        if( g0Inv == 0 )
-            exit(1);
-
-        int u = mod( f.x[0] * g0Inv, p );
-
-        for( int i = 0; i < deg(f); i++ ) {
-            f.x[i] = mod( f.x[i] - u * g.x[i], p );
-        }
-
-        for( int i = 0; i < deg(b); i++ ) {
-            b.x[i] = mod( b.x[i] - u * c.x[i], p );
-        }
-    }
-
 }
 
 
@@ -2832,6 +2846,17 @@ for(i=1;i<K+1;i++)
     return sin;
 }
 
+vec zynd(vec e) {
+    vec sin = {0};
+    int t = (N - K) / 2;   // 訂正能力
+    int Slen = 2 * t;
+
+    for (int i = 1; i <= Slen; i++) {
+        sin.x[i-1] = trace(e, mltn(i, Prim));
+    }
+    return sin;
+}
+
 
 vec L2(){
     vec v={0};
@@ -2861,6 +2886,17 @@ vec L3(vec f){
     vec ff[K]={0};
     vec g0={0};
 
+
+for (count = 0; count < K; ++count) {
+    int alpha_pow = mltn(count+1, Prim); // alpha^(count+1)
+    // (x - alpha_pow) -> constant term = (q - alpha_pow) % q
+    ff[count].x[0] = (N - alpha_pow) % N;
+    ff[count].x[1] = 1;
+}
+g0.x[0] = 1;
+for (i = 0; i < K; ++i) g0 = vmul(g0, ff[i], N);
+
+/*
     while(1){
         ff[count].x[0]=N-mltn(f.x[count],Prim);
         ff[count++].x[1]=1;
@@ -2871,9 +2907,10 @@ vec L3(vec f){
     g0.x[0]=1;
     for(i=0;i<N-K;i++)
     g0=vmul(g0,ff[i],N);
-
+*/
     return g0;
 }
+
 
 
 
@@ -3003,8 +3040,8 @@ x.x[j-i]=a.x[i];
 return x;
 }
 
-
-void dmd(MTX bb){
+#include "dmd.c"
+vec dmd(MTX bb){
     int i,j;
 
     oterm xa[N+1][N+1]={0};
@@ -3035,7 +3072,7 @@ void dmd(MTX bb){
     for(i=0;i<N+1;i++)
     printf("%d,%d[%d]=%d\n",yx[i]%N,xa[0][i].a,i,xa[0][i].n);
     printf("\n");
-  
+
     vec ucc={0};
     for(i=0;i<T+1;i++){
     ucc.x[T-i]=yx[i]%N;
@@ -3064,14 +3101,20 @@ void dmd(MTX bb){
         printf("baka\n");
         exit(1);
     }
+    vec ans={0};
     //if(deg(a)==0 && vLT(a).a>0)
     //b=kof2(vLT(a).a,b);
-    for(i=0;i<N;i++)
-    printf("sy%d,",((N-trace(b,(i+1)%N))%N));
+    
+    for(i=0;i<N;i++){
+    ans.x[i]=((N-trace(b,(i+1)%N))%N);
+    printf("sy[%d],",ans.x[i]);
+    }
     printf("\n");
-  
+    
+    //printpoln(ans);
     //exit(1);
 
+    return ans;
 }
 
 vec vecky(vec mm){
@@ -3142,7 +3185,8 @@ MTA B={0};
     //renritu(monde(N),N-1);
     //cipher();
     //exit(1);
-    van(K);
+    //van(K);
+    vv(K);
     vec v={0};
     //for(i=0;i<N;i++)
     v.x[3]=1;
@@ -3153,28 +3197,28 @@ MTA B={0};
     //exit(1);
     //for(i=0;i<K-1;i++)
     //mm.x[i]=rand()%2;
-    
+
     int y=m(0b11111111,gol);
     int p=v2i(bdiv(i2v(y),i2v(gol)));
     printf("%b \n",p);
     //exit(1);
     vec vc={0}; //vmul(mm,v,N);
     //vc=vadd(vc,vmod(vc,g0));
-    
+
     mm.x[0]=rand()%N;
     mm.x[1]=rand()%N;
     vec L={0};
-    for(i=0;i<N-K;i++)
+    for(i=0;i<K;i++)
     L.x[i]=i+1;
     g0=L3(L); //keygen();
     printf("g0=\n");
     printpoln(g0);
     printf("code=\n");
     printpoln(vmul(mm,g0,N));
+    printf("m=\n");
     printpoln(mm);
     (vecky(mm));
     (konv(mm));
-    printpoln(vmul(mm,g0,N));
     //exit(1);
 
     for(i=0;i<N;i++){
@@ -3186,15 +3230,17 @@ MTA B={0};
         vc.x[i]%=N;
     printf("\n");
     }
-    
+
     vec f=konv(mm);
-    
+
     printpoln(vc);
     //printpoln(mm);
     //exit(1);
 
     vec cv=vmul(mm,g0,N); //vecky(mm);
+    printf("符号語\n");
     printpoln(cv);
+    printf("平文\n");
     printpoln(mm);
     for(i=0;i<N;i++){
         printf("trf %d,",trace(mm,(i+1)%N));
@@ -3203,13 +3249,13 @@ MTA B={0};
     //exit(1);
 
     vec t={0};
-    //mkerr(t.x,T);
-    
-    for(i=0;i<N;i++)
-    t.x[i]=1;
-    
+    mkerr(t.x,T);
+
+    //for(i=0;i<N;i++)
+    //t.x[i]=1;
+
     vec vx=vadd(f,t);
-    list(t);
+    list(vx);
     //exit(1);
     for(i=0;i<N;i++){
         for(int j=0;j<N+1;j++){
@@ -3222,22 +3268,31 @@ MTA B={0};
     MTX bb=sankaku(A,N);
     //exit(1);
 
-    dmd(bb);
-    printf("code=\n");
-    printf("mm= ");
+    vec ans=dmd2(bb);
+    printf("ans= ");
+    printpoln(ans);
+    printf("f+e= ");
     printpoln(vx);
-    //printf("f+e= ");
-    //printpoln(vx);
+    printf("e= ");
+    printpoln(t);
+    printf("err= ");
+    printpoln(vsub(vx,ans));
+    printf("mm= ");
+    printpoln(mm);
+    printf("word= ");
+    vec num={0};
+    for(i=0;i<N;i++)
+    num.x[i]=i+1;
+    vec out={0};
+    lagrange_interpolate(&num.x, &f.x,N,&out.x);
+    printpoln(out);
     printf("f= ");
     printpoln(f);
-    printf("c= ");
-    printpoln(t);
-    printf("r= ");
-    printpoln(vx);
     //monde(N);
     exit(1);
 
     //cv.x[0]+=1;
+    
     
     vc=vadd(vc,vmod(vc,g0));
     //vmul(mm,g0,N);
@@ -3247,7 +3302,8 @@ MTA B={0};
     vec xv=vmul(mm,g0,N);
     printpoln(xv);
     //exit(1);
-
+    
+    /*
     vec vv={0};
     for(i=0;i<N;i++)
     vv.x[N-i-1]=vc.x[i];
@@ -3281,12 +3337,13 @@ MTA B={0};
     printpoln(t);
     //monde(N);
     //exit(1);
-
+    */
+    
     //printpoln(vc);
     //exit(1);
-    mkerr(cc.x,T);
-    //for(i=0;i<T;i++)
-    //cc.x[3]=1;
+    //mkerr(cc.x,T);
+    for(i=0;i<T;i++)
+    cc.x[i]=1;
     printf("AI\n");
     vec r=vadd(cc,xv); //zind(vadd(cc,vc));
     printpoln(r);
@@ -3303,7 +3360,12 @@ MTA B={0};
     //itiji(Z.z);
     //exit(1);
     */
-    ymo o0=bm_itr(zind(r).x);
+    vec ss=zynd(r);
+    vec vtmp={0};
+    for(i=0;i<N-K;i++)
+    vtmp.x[N-K-1-i]=r.x[i];
+    ymo o0={0}; //=bm_itr(zind(r).x);
+    bm_vec(vtmp.x,N-K,&o0.f);
     chen(o0.f);
     for(i=0;i<N;i++)
     printf("%d,%d\n",i,cc.x[i]);
