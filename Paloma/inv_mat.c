@@ -172,12 +172,12 @@ MTX matinv(MTX a, int n)
 
 lab:
   memset(b, 0, sizeof(b));
-  memset(a.x, 0, sizeof(a.x));
+  //memset(a.x, 0, sizeof(a.x));
   for (i = 0; i < n; i++)
   {
     for (j = 0; j < n; j++)
     {
-      a.x[i][j] = rand() % 256;
+      //a.x[i][j] = rand() % 256;
       printf("%d,", a.x[i][j]);
     }
     printf("\n");
@@ -290,6 +290,7 @@ lab:
     }
     printf("\n");
   }
+  //exit(1);
 
   int flg = 0;
   for (i = 0; i < n; i++)
