@@ -4854,7 +4854,7 @@ vec generate_c(int q, vec w, int n) {
 
     paloma_safe(v2o(rr), v2o(w), count);
     printf("cc%b\n",v);
-    exit(1);
+    //exit(1);
 
     return rr;
 }
@@ -4887,6 +4887,7 @@ bb:
   //公開鍵を生成する
  //w = pubkeygen();
  //w=mkg();
+ while(1){
  w=mkpol();
  if(has_square_factor(w)>0)
  goto bb;
@@ -4907,11 +4908,11 @@ unsigned short ta[N]={0};
 int count=0;
 unsigned q=rand()&0xffff;
 vec c[K]={0};
-while(1){
+//while(1){
 vec vx=generate_c(q,o2v(w),16);
 //q^=vx.x[0]^(vx.x[1]<<4)^(vx.x[2]<<8);
 //printf("bb%b\n",q);
-break;
+//break;
 }
 exit(1);
 
