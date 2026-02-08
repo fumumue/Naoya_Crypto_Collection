@@ -4604,7 +4604,7 @@ vec paloma_safe(OP s, OP f, int n)
     OP u, sp;
     OP a0, a1, b0, b1;
     OP q, r, b2;
-    int flag=0;
+    int flag=0,flood=0;
 
     x.x[1] = 1;   // x
     v.x[0] = 1;   // 1
@@ -4612,6 +4612,14 @@ vec paloma_safe(OP s, OP f, int n)
     // 座標シフト α を適用（位置0対応）
     int alpha = 1; // 適宜設定
 
+    if(has_square_factor(s)>0){
+      printf("doble\n");
+    //exit(1);
+    }
+    if(odeg(s)<n){
+      printf("low\n");
+    exit(1);
+    }
     dd:
     OP x_shifted = oadd(v2o(v), kof(alpha, v2o(x)));
 
@@ -4642,6 +4650,7 @@ vec paloma_safe(OP s, OP f, int n)
         flag=1;
         goto dd;
         }
+        exit(1);
     }
 
     // 正規化
@@ -4667,7 +4676,7 @@ vec paloma_safe(OP s, OP f, int n)
     a0 = sp; a1 = g12;
     b0 = v2o(v); b1 = null;
 
-    int max_iter = 2*K; // 安全上限
+    int max_iter = K; // 安全上限
     int iter = 0;
     while (iter++ < max_iter) {
         q = odiv(a0, a1);
@@ -4677,16 +4686,21 @@ vec paloma_safe(OP s, OP f, int n)
         b2 = omod(oadd(b0, omul(q,b1)), g12);
         b0 = b1; b1 = b2;
 
-        if (odeg(a0) == n/2 - odeg(g1) &&
+        if (odeg(a0) <= n/2 - odeg(g1) &&
             odeg(b0) <= (n-1)/2 - odeg(g2))
             break;
 
-        if (odeg(a1) < 0) {
-            printf("Euclid failed\n");
+            
+        if (o2v(a1).x[0]==0 && odeg(a1)==0) {
+            printpol(o2v(a1));
+            printf(" ^---- Euclid failed\n");
+            //flood=1;
+            //break;
             exit(1);
         }
+          
     }
-    if(iter >= max_iter) {
+    if(iter > max_iter) {
         printf("Euclid loop exceeded\n");
         exit(1);
     }
@@ -4694,9 +4708,10 @@ vec paloma_safe(OP s, OP f, int n)
     // σ = a^2 + (x+α)*b^2
     OP a = omul(a0, g2);
     OP b = omul(b0, g1);
-    OP sigma = oadd(omul(a,a), omul(omul(b,b), x_shifted));
+    OP sigma = (oadd(omul(a,a), omul(omul(b,b), x_shifted)));
 
-    if (odeg(sigma) != K) {
+    if (flood==1) 
+    {
         printf("deg(sigma) != %d\n",odeg(sigma));
         //exit(1);
     }
@@ -4828,7 +4843,7 @@ vec generate_c(int q, vec w, int n) {
         c[i].x[1] = 0;
     }
 
-    for(int i=0; i<16; i++) {
+    for(int i=0; i< 32; i++) {
         if(q % 2 == 1) {
             c[count].x[1] = 1;
             c[count].x[0] = i;
@@ -4838,19 +4853,14 @@ vec generate_c(int q, vec w, int n) {
         if(q == 0)
             break;
     }
-    
-    // まだ count<K なら、上位ビットで強制的に埋める
-    for(int i=16; count<n && i<32; i++) {
-        c[count].x[1] = 1;
-        c[count].x[0] = i;
-        count++;
-    }
-    
+
     vec rr = ryuec(c, w, count);
     printpol(rr);
     printf("\n");
-    //if(has_square_factor(v2o(rr))>0 || deg(rr)<n-1)
+    if(has_square_factor(v2o(rr))>0 ){
+      printf("Uh\n");
     //exit(1);
+    }
 
     paloma_safe(v2o(rr), v2o(w), count);
     printf("cc%b\n",v);
@@ -4883,11 +4893,12 @@ unsigned short s[K+1]={0,15,1,9,13,1,14};
 int j=0;
   //chu();
 
-bb:
   //公開鍵を生成する
  //w = pubkeygen();
  //w=mkg();
- while(1){
+int yami=0;
+bb:
+while(1){
  w=mkpol();
  if(has_square_factor(w)>0)
  goto bb;
@@ -4906,13 +4917,17 @@ unsigned short ta[N]={0};
 
 
 int count=0;
-unsigned q=rand()&0xffff;
+unsigned q=rand()&0xffffffff;
 vec c[K]={0};
 //while(1){
 vec vx=generate_c(q,o2v(w),16);
 //q^=vx.x[0]^(vx.x[1]<<4)^(vx.x[2]<<8);
 //printf("bb%b\n",q);
 //break;
+yami++;
+printf("kiri=%d\n",yami);
+if(yami==1000)
+break;
 }
 exit(1);
 
