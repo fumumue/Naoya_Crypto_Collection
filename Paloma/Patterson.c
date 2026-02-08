@@ -4592,6 +4592,7 @@ vec paloma_flexible(OP s, OP f)
 }
 
 
+
 vec paloma_safe(OP s, OP f, int n)
 {
     vec x = {0};
@@ -4603,12 +4604,15 @@ vec paloma_safe(OP s, OP f, int n)
     OP u, sp;
     OP a0, a1, b0, b1;
     OP q, r, b2;
+    int flag=0;
 
     x.x[1] = 1;   // x
     v.x[0] = 1;   // 1
 
     // 座標シフト α を適用（位置0対応）
     int alpha = 1; // 適宜設定
+
+    dd:
     OP x_shifted = oadd(v2o(v), kof(alpha, v2o(x)));
 
     // ss = 1 + s*(x+α) mod f
@@ -4618,15 +4622,26 @@ vec paloma_safe(OP s, OP f, int n)
     g1 = gcd(s, f);
     g2 = gcd(ss, f);
     g12 = odiv(f, omul(g1, g2));
-
+    
     if (odeg(gcd(g12,v2o(bibun2(o2v(g12)))))>0) {
         printf("g12 has square factor\n");
-        //exit(1);
+        exit(1);
     }
 
     if (odeg(g12) < n-1) {
         printf("deg(g12) too small\n");
+        printpol(o2v(s));
+        printf("\n");
+        printpol(o2v(f));
+        printf("\n");
+        alpha=rand()%N;
+        printf("alpha=%d\n",alpha);
+        if(flag==1)
         exit(1);
+        if(flag==0){
+        flag=1;
+        goto dd;
+        }
     }
 
     // 正規化
@@ -4652,7 +4667,7 @@ vec paloma_safe(OP s, OP f, int n)
     a0 = sp; a1 = g12;
     b0 = v2o(v); b1 = null;
 
-    int max_iter = 2*n; // 安全上限
+    int max_iter = 2*K; // 安全上限
     int iter = 0;
     while (iter++ < max_iter) {
         q = odiv(a0, a1);
@@ -4681,8 +4696,8 @@ vec paloma_safe(OP s, OP f, int n)
     OP b = omul(b0, g1);
     OP sigma = oadd(omul(a,a), omul(omul(b,b), x_shifted));
 
-    if (odeg(sigma) != K/2) {
-        printf("deg(sigma) != K\n");
+    if (odeg(sigma) != K) {
+        printf("deg(sigma) != %d\n",odeg(sigma));
         //exit(1);
     }
 
@@ -4780,6 +4795,7 @@ MTX gen_mat(MTX A, MTX B)
     return G;
 }
 
+
 #define ROWS 255     // RS length
 #define COLS 256     // Binary Goppa length
 #define MAX_ITER 5
@@ -4789,7 +4805,7 @@ vec ryuec(vec a[T*2],vec w,int n){
   vec x={0};
 
   if(has_square_factor(v2o(w))>0){
-    printf("baka\n");
+    printf("baka_a\n");
     exit(1);
   }
 
@@ -4802,6 +4818,46 @@ vec ryuec(vec a[T*2],vec w,int n){
   return o2v(omod(omul(v2o(x),v2o(t)),v2o(w)));
 }
 
+
+// q からエラー位置を作って ryuec と paloma_safe を呼ぶ関数
+vec generate_c(int q, vec w, int n) {
+    int count = 0,v=q;
+    vec c[K];
+    for(int i=0; i<n; i++) { // vec を 0 初期化
+        c[i].x[0] = 0;
+        c[i].x[1] = 0;
+    }
+
+    for(int i=0; i<16; i++) {
+        if(q % 2 == 1) {
+            c[count].x[1] = 1;
+            c[count].x[0] = i;
+            count++;
+        }
+        q >>= 1;
+        if(q == 0)
+            break;
+    }
+    
+    // まだ count<K なら、上位ビットで強制的に埋める
+    for(int i=16; count<n && i<32; i++) {
+        c[count].x[1] = 1;
+        c[count].x[0] = i;
+        count++;
+    }
+    
+    vec rr = ryuec(c, w, count);
+    printpol(rr);
+    printf("\n");
+    //if(has_square_factor(v2o(rr))>0 || deg(rr)<n-1)
+    //exit(1);
+
+    paloma_safe(v2o(rr), v2o(w), count);
+    printf("cc%b\n",v);
+    exit(1);
+
+    return rr;
+}
 
 //言わずもがな
 int main(void)
@@ -4825,25 +4881,39 @@ unsigned short s[K+1]={0,15,1,9,13,1,14};
 //exit(1);
 
 int j=0;
-
   //chu();
 
 bb:
   //公開鍵を生成する
  //w = pubkeygen();
- w=mkg();
+ //w=mkg();
+ w=mkpol();
+ if(has_square_factor(w)>0)
+ goto bb;
+unsigned short ta[N]={0};
+ for (int i = 0; i < N; i++)
+  {
+    ta[i] = trace(w, i);
+    if (ta[i] == 0)
+    {
+      printf("trace 0 @ %d\n", i);
+      //fail = 1;
+      goto bb;
+      //exit(1);
+    }
+  }
 
- vec c[K]={0};
-for(int i=0;i<40;i++){
-  c[i].x[1]=1;
-  c[i].x[0]=i+1;
+
+int count=0;
+unsigned q=rand()&0xffff;
+vec c[K]={0};
+while(1){
+vec vx=generate_c(q,o2v(w),16);
+//q^=vx.x[0]^(vx.x[1]<<4)^(vx.x[2]<<8);
+//printf("bb%b\n",q);
+break;
 }
-
- vec rr=ryuec(c,o2v(w),40);
- printpol(rr);
- printf("\n");
- paloma_safe(v2o(rr),w,40);
-  exit(1);
+exit(1);
 
 
   MTX AA={0},BB={0};
