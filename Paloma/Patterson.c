@@ -4849,6 +4849,47 @@ vec generate_c(unsigned q, vec w) {
     return rr;
 }
 
+void lets(void){
+  
+  MTX AA={0},BB={0};
+for(int i=0;i<K;i++){
+  for(int j=N-K;j<N;j++){
+  AA.x[i][j-N+K]=mat[j][i];
+  //printf("%d,",mat[j][i]);
+  //A.x[i][j]=mat[j][i];
+  }
+  for(int j=0;j<N;j++)
+  BB.x[i][j]=mat[j][i];
+  //printf("\n");
+}
+
+
+MTX V={0};
+
+BB=gen_mat(AA,BB);
+for(int i=0;i<K;i++){
+  for(int j=0;j<N;j++)
+  printf("%d,",BB.x[i][j]);
+printf("\n");
+}
+for(int i=0;i<K;i++){
+  for(int j=0;j<K;j++){
+    unsigned short s=0;
+    for(int k=0;k<N;k++)
+    s^=gf[mlt(fg[BB.x[i][k]],fg[mat[k][j]])];
+    V.x[i][j]=s;
+  }
+}
+for(int i=0;i<K;i++){
+  for(int j=0;j<K;j++)
+  printf("%d,",V.x[i][j]);
+printf("\n");
+}
+exit(1);
+
+}
+
+
 //言わずもがな
 int main(void)
 {
@@ -4873,12 +4914,12 @@ unsigned short s[K+1]={0,15,1,9,13,1,14};
 int j=0;
   //chu();
 
-  //公開鍵を生成する
+//公開鍵を生成する
  //w = pubkeygen();
  //w=mkg();
-int yami=0;
+
+ int yami=0;
 bb:
-while(1){
  //誰専
  w=mkpol();
  if(has_square_factor(w)>0)
@@ -4898,6 +4939,8 @@ while(1){
   }
 
 
+while(1){
+
 int count=0;
 unsigned q=rand()&0xffffffff;
 vec c[K]={0};
@@ -4914,43 +4957,6 @@ printf("kiri=%d\n",yami);
 if(yami==1000)
 break;
 }
-exit(1);
-
-
-  MTX AA={0},BB={0};
-for(int i=0;i<K;i++){
-  for(int j=N-K;j<N;j++){
-  AA.x[i][j-N+K]=mat[j][i];
-  //printf("%d,",mat[j][i]);
-  //A.x[i][j]=mat[j][i];
-  }
-  for(int j=0;j<N;j++)
-  BB.x[i][j]=mat[j][i];
-  //printf("\n");
-}
-
-MTX V={0};
-
-BB=gen_mat(AA,BB);
-for(int i=0;i<K;i++){
-  for(j=0;j<N;j++)
-  printf("%d,",BB.x[i][j]);
-printf("\n");
-}
-for(int i=0;i<K;i++){
-  for(j=0;j<K;j++){
-    unsigned short s=0;
-    for(int k=0;k<N;k++)
-    s^=gf[mlt(fg[BB.x[i][k]],fg[mat[k][j]])];
-    V.x[i][j]=s;
-  }
-}
-for(int i=0;i<K;i++){
-  for(j=0;j<K;j++)
-  printf("%d,",V.x[i][j]);
-printf("\n");
-}
-//exit(1);
 
 
   return 0;
