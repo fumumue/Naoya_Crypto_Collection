@@ -4593,7 +4593,7 @@ vec paloma_flexible(OP s, OP f)
 
 
 
-vec paloma_safe(OP s, OP f, int n)
+vec paloma_safe(OP s, OP f)
 {
     vec x = {0};
     vec v = {0};
@@ -4616,10 +4616,7 @@ vec paloma_safe(OP s, OP f, int n)
       printf("doble\n");
     //exit(1);
     }
-    if(odeg(s)<n){
-      printf("low\n");
-    exit(1);
-    }
+
     dd:
     OP x_shifted = oadd(v2o(v), kof(alpha, v2o(x)));
 
@@ -4633,23 +4630,6 @@ vec paloma_safe(OP s, OP f, int n)
     
     if (odeg(gcd(g12,v2o(bibun2(o2v(g12)))))>0) {
         printf("g12 has square factor\n");
-        exit(1);
-    }
-
-    if (odeg(g12) < n-1) {
-        printf("deg(g12) too small\n");
-        printpol(o2v(s));
-        printf("\n");
-        printpol(o2v(f));
-        printf("\n");
-        alpha=rand()%N;
-        printf("alpha=%d\n",alpha);
-        if(flag==1)
-        exit(1);
-        if(flag==0){
-        flag=1;
-        goto dd;
-        }
         exit(1);
     }
 
@@ -4676,7 +4656,7 @@ vec paloma_safe(OP s, OP f, int n)
     a0 = sp; a1 = g12;
     b0 = v2o(v); b1 = null;
 
-    int max_iter = K; // 安全上限
+    int max_iter = K*2; // 安全上限
     int iter = 0;
     while (iter++ < max_iter) {
         q = odiv(a0, a1);
@@ -4686,8 +4666,8 @@ vec paloma_safe(OP s, OP f, int n)
         b2 = omod(oadd(b0, omul(q,b1)), g12);
         b0 = b1; b1 = b2;
 
-        if (odeg(a0) <= n/2 - odeg(g1) &&
-            odeg(b0) <= (n-1)/2 - odeg(g2))
+        if (odeg(a0) <= K/2 - odeg(g1) &&
+            odeg(b0) <= (K-1)/2 - odeg(g2))
             break;
 
             
@@ -4835,14 +4815,16 @@ vec ryuec(vec a[T*2],vec w,int n){
 
 
 // q からエラー位置を作って ryuec と paloma_safe を呼ぶ関数
-vec generate_c(int q, vec w, int n) {
+vec generate_c(unsigned q, vec w) {
     int count = 0,v=q;
-    vec c[K];
+    vec c[K]={0};
+    
+    /*
     for(int i=0; i<n; i++) { // vec を 0 初期化
         c[i].x[0] = 0;
         c[i].x[1] = 0;
     }
-
+    */
     for(int i=0; i< 32; i++) {
         if(q % 2 == 1) {
             c[count].x[1] = 1;
@@ -4861,11 +4843,9 @@ vec generate_c(int q, vec w, int n) {
       printf("Uh\n");
     //exit(1);
     }
-
-    paloma_safe(v2o(rr), v2o(w), count);
-    printf("cc%b\n",v);
+    //if(count>16){
     //exit(1);
-
+    //}
     return rr;
 }
 
@@ -4899,10 +4879,12 @@ int j=0;
 int yami=0;
 bb:
 while(1){
+ //誰専
  w=mkpol();
  if(has_square_factor(w)>0)
  goto bb;
-unsigned short ta[N]={0};
+ 
+ unsigned short ta[N]={0};
  for (int i = 0; i < N; i++)
   {
     ta[i] = trace(w, i);
@@ -4919,11 +4901,14 @@ unsigned short ta[N]={0};
 int count=0;
 unsigned q=rand()&0xffffffff;
 vec c[K]={0};
-//while(1){
-vec vx=generate_c(q,o2v(w),16);
-//q^=vx.x[0]^(vx.x[1]<<4)^(vx.x[2]<<8);
-//printf("bb%b\n",q);
-//break;
+
+
+vec vx=generate_c(q,o2v(w));
+
+printf(" ==marrie\n");
+paloma_safe(v2o(vx), (w));
+printf("cc%b\n",vx);
+
 yami++;
 printf("kiri=%d\n",yami);
 if(yami==1000)
@@ -4967,46 +4952,6 @@ printf("\n");
 }
 //exit(1);
 
-while(1){
-
-//エラーベクトルを生成する
-  memset(z1, 0, sizeof(z1));
-  
-//for(int i=1;i<K+1;i=i+2)
-
-int i=0;
-for(i=0;i<K;i++)
-z1[i]=1;
-//mkerr(z1, T * 2);
-  //exit(1);
-
-  //encryotion
-  //test (w, z1);
-
-  //シンドロームを計算する
-  //f=sin2(z1);
-  f=synd(z1);
-  printpol(o2v(f));
-  printf(" ==syndrome\n");
-
-  //復号化の本体
-  //v=patterson(w, f);
-  v=paloma_safe(f, w,K);
-  /*
-  if(oequ(v2o(v),v2o(v2))==-1){
-      printpol(v);
-      printf(" ==v\n");
-      printpol(v2);
-      printf(" ==v2\n");
-      exit(1);
-    }
-  */
-  //chen(v2o(v));
-  //エラー表示
-  //ero2(v);
-  goto bb;
-  //break;
-}
 
   return 0;
 }
