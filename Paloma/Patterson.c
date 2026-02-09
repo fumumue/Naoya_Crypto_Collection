@@ -4819,12 +4819,6 @@ vec generate_c(unsigned q, vec w) {
     int count = 0,v=q;
     vec c[K]={0};
     
-    /*
-    for(int i=0; i<n; i++) { // vec を 0 初期化
-        c[i].x[0] = 0;
-        c[i].x[1] = 0;
-    }
-    */
     for(int i=0; i< 32; i++) {
         if(q % 2 == 1) {
             c[count].x[1] = 1;
@@ -4843,9 +4837,7 @@ vec generate_c(unsigned q, vec w) {
       printf("Uh\n");
     //exit(1);
     }
-    //if(count>16){
-    //exit(1);
-    //}
+
     return rr;
 }
 
@@ -4950,7 +4942,7 @@ vec vx=generate_c(q,o2v(w));
 
 printf(" ==marrie\n");
 paloma_safe(v2o(vx), (w));
-printf("cc%b\n",vx);
+printf("cc%b\n",q);
 
 yami++;
 printf("kiri=%d\n",yami);
