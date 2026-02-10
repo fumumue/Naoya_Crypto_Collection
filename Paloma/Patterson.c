@@ -778,7 +778,31 @@ void printpol(vec a)
   return;
 }
 
+//多項式を表示する(default)
+void printpoln(vec a)
+{
+  int i, n;
 
+  n = deg(a);
+
+  //printf ("baka\n");
+  assert(("baka\n", n >= 0));
+
+  for (i = n; i > -1; i--)
+  {
+    if (a.x[i] > 0)
+    {
+      printf("%u", a.x[i]);
+      //if (i > 0)
+      printf("x^%d", i);
+      //if (i > 0)
+      printf("+");
+    }
+  }
+    printf("\n");
+
+  return;
+}
 
 
 
@@ -4881,15 +4905,29 @@ exit(1);
 
 }
 
+int trchk(OP w){
+  unsigned short ta[N]={0};
+ for (int i = 0; i < N; i++)
+  {
+    ta[i] = trace(w, i);
+    if (ta[i] == 0)
+    {
+      printf("trace 0 @ %d\n", i);
+      //fail = 1;
+      return -1;
+      //exit(1);
+    }
+  }
+
+  return 0;
+}
+
 
 //言わずもがな
 int main(void)
 {
-  unsigned short z1[N] = {0}; //{1,0,1,1,1,0,0,0,0,0,1,1,1,0,0,1};
-  OP f = {0}, r = {0}, w = {0};
-  vec v={0};
-  unsigned short ss[K] = {0};
-
+  OP w = {0};
+  
 srand(clock());
 if (K > N){
   printf("configuration error! K is too big K\n");
@@ -4898,7 +4936,7 @@ if (K > N){
 
 
 //kabatiansky example
-unsigned short s[K+1]={0,15,1,9,13,1,14};
+//unsigned short s[K+1]={0,15,1,9,13,1,14};
 //Berlekamp-Massey法（UnderConstruction）
 //bms(s);
 //exit(1);
@@ -4911,35 +4949,25 @@ int j=0;
  //w=mkg();
 
  int yami=0;
-bb:
- //誰専
- w=mkpol();
- if(has_square_factor(w)>0)
- goto bb;
  
- unsigned short ta[N]={0};
- for (int i = 0; i < N; i++)
-  {
-    ta[i] = trace(w, i);
-    if (ta[i] == 0)
-    {
-      printf("trace 0 @ %d\n", i);
-      //fail = 1;
-      goto bb;
-      //exit(1);
-    }
-  }
+  
+ //誰専
+ while(1){
+ w=mkpol();
+ if(has_square_factor(w)==0 && trchk((w))==0)
+ break;
+ //goto bb;
+ }
 
 
 while(1){
 
 int count=0;
 unsigned q=rand()&0xffffffff;
-vec c[K]={0};
 
 
 vec vx=generate_c(q,o2v(w));
-
+printpol(vx);
 printf(" ==marrie\n");
 paloma_safe(v2o(vx), (w));
 printf("cc%b\n",q);
