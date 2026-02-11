@@ -1326,7 +1326,7 @@ OP zgcd2(OP a, OP n, int P)
   return x;
 }
 
-/*
+
 // GCD for decode
 OP ogcd(OP xx, OP yy)
 {
@@ -1346,7 +1346,7 @@ OP ogcd(OP xx, OP yy)
 
   return tt;
 }
-*/
+
 
 //gcd
 OP gcd(OP xx, OP yy)
@@ -1379,6 +1379,7 @@ OP gcd(OP xx, OP yy)
   }
 //  return yy;
 }
+
 
 //error locater for decode
 OP vx(OP f, OP g)
@@ -2056,7 +2057,35 @@ int ben_or(OP f)
     return 0;
 }
 
-//ユークリッドアルゴリズムによる復号関数
+
+vec bibun2(vec a)
+{
+    vec d = {0};
+    int i;
+    for (i = 1; i <= deg(a); i += 2) {
+        d.x[i-1] = a.x[i]; // odd degree only
+    }
+    return d;
+}
+
+
+
+OP kof(unsigned short c,OP f){
+int i,j,k;
+vec b={0},h={0};
+OP g={0};
+
+b=o2v(f);
+k=deg(b);
+for(i=0;i<k+1;i++){
+h.x[i]=gf[mlt(fg[c],fg[b.x[i]])];
+}
+g=v2o(h);
+
+return g;
+}
+
+// ユークリッドアルゴリズムによる復号関数
 OP decode(OP f, OP s)
 {
   int i, j, k, count = 0;
@@ -2071,6 +2100,7 @@ OP decode(OP f, OP s)
   printpol(o2v(s));
   printf("\nsyn===========\n");
   r = vx(f, s);
+  // h=ogcd(f,s);
 
   if (odeg((r)) == 0)
   {
@@ -2080,26 +2110,7 @@ OP decode(OP f, OP s)
   k = 0;
   // exit(1);
   x = chen(r);
-  // exit(1);
 
-  for (i = 0; i < T; i++)
-  {
-    printf("x[%d]=1\n", x.x[i]);
-    if (x.x[i] == 0)
-      k++;
-    if (k > 1)
-    {
-      printf("baka0\n");
-      printvec(o2v(f));
-      //for (i = 0; i < N; i++)
-      //printf("%d,", zz[i]);
-      exit(1);
-      //return f;
-    }
-  }
-  //exit(1);
-
-  //  printf("\n");
 
   printf("あっ、でる！\n");
   //  exit(1);
@@ -2111,63 +2122,41 @@ OP decode(OP f, OP s)
     exit(1);
   }
 
-  w = bibun(x);
-  //exit(1);
-  //  w=oterml(w,d1);
+  l = v2o(bibun2(o2v(r)));
+  // exit(1);
+  //   w=oterml(w,d1);
   printpol(o2v(w));
   printf("@@@@@@@@@\n");
-  //exit(1);
+  // exit(1);
 
-  //hh = xgcd(f, s);
-  h = zgcd(f, s,T-1);
-  //printpol(o2v(hh.d));
+  // hh = xgcd(f, s);
+  h = ogcd(f, s);
+  // printpol(o2v(hh.d));
   printpol(o2v(h));
-  //wait();
+  // wait();
 
-  //  exit(1);
-  t1 = LT(r);
 
-  t2.a = t1.a;
-  t2.n = 0;
-
-  if (odeg((w)) == 0)
-  {
-    printpol(o2v(w));
-  }
-  l = oterml(w, t2);
-
-  j = deg(x) + 1;
+  j = odeg(l) + 1;
   printf("%d\n", j);
 
   //    exit(1);
 
   for (i = 0; i < j; i++)
   {
-    //if (x.x[i] > 0)
+    // if (x.x[i] > 0)
     {
-      //e.t[i].a =
-      //  gf[mlt(fg[trace(hh.d, x.x[i])], oinv(trace(l, x.x[i])))];
+      // e.t[i].a =
+      //   gf[mlt(fg[trace(hh.d, x.x[i])], oinv(trace(l, x.x[i])))];
       e.t[i].a = gf[mlt(fg[trace(h, x.x[i])], oinv(trace(l, x.x[i])))];
       e.t[i].n = x.x[i];
+      printf("%d %d\n",e.t[i].n,e.t[i].a);
     }
   }
-  printpol(o2v(f));
-  printf(" f============\n");
-  printpol(o2v(l));
-  printf(" l============\n");
-  //  exit(1);
 
-  for (i = 0; i < T; i++)
-    if (gf[trace(h, x.x[i])] == 0)
-      printf("h=0");
-  //printf("\n");
-  for (i = 0; i < T; i++)
-    if (gf[oinv(trace(l, x.x[i]))] == 0)
-      printf("l=0\n");
-  //  printf("\n");
 
   return e;
 }
+
 
 
 //ユークリッドアルゴリズムによる復号関数
@@ -3571,17 +3560,6 @@ aa:
 }
 
 
-vec bibun2(vec a)
-{
-    vec d = {0};
-    int i;
-    for (i = 1; i <= deg(a); i += 2) {
-        d.x[i-1] = a.x[i]; // odd degree only
-    }
-    return d;
-}
-
-
 int has_square_factor(OP g12) {
     OP d = gcd((g12), v2o(bibun2(o2v(g12)))); // bibun() は形式的微分
     if(odeg(d)==0)
@@ -4267,7 +4245,7 @@ void mkerr(unsigned short *z1, int num)
     //printf ("l=%d\n", l);
     if (0 == z1[l])
     {
-      z1[l] = 1;
+      z1[l] = l+1;
       printf("l=%d %d\n", l, j);
       j++;
     }
@@ -4363,21 +4341,6 @@ OP cos2(unsigned short zz[N])
   
   
   return s;
-}
-
-OP kof(unsigned short c,OP f){
-int i,j,k;
-vec b={0},h={0};
-OP g={0};
-
-b=o2v(f);
-k=deg(b);
-for(i=0;i<k+1;i++){
-h.x[i]=gf[mlt(fg[c],fg[b.x[i]])];
-}
-g=v2o(h);
-
-return g;
 }
 
 unsigned short logx(unsigned short u){
@@ -4638,7 +4601,7 @@ vec paloma_safe(OP s, OP f)
 
     if(has_square_factor(s)>0){
       printf("doble\n");
-    //exit(1);
+    exit(1);
     }
 
     dd:
@@ -4839,11 +4802,11 @@ vec ryuec(vec a[T*2],vec w,int n){
 
 
 // q からエラー位置を作って ryuec と paloma_safe を呼ぶ関数
-vec generate_c(unsigned q, vec w) {
+vec generate_c(__uint128_t q, vec w) {
     int count = 0,v=q;
     vec c[K]={0};
     
-    for(int i=0; i< 32; i++) {
+    for(int i=0; i< K; i++) {
         if(q % 2 == 1) {
             c[count].x[1] = 1;
             c[count].x[0] = i;
@@ -4946,8 +4909,15 @@ int j=0;
 
 //公開鍵を生成する
  //w = pubkeygen();
- //w=mkg();
+ unsigned short z1[N]={0};
 
+ /*
+ w=mkg(w);
+mkerr(z1,T);
+OP vv=synd(z1);
+decode(w,vv);
+exit(1);
+*/
  int yami=0;
  
   
@@ -4958,20 +4928,31 @@ int j=0;
  break;
  //goto bb;
  }
+ printpol(o2v(w));
+ printf("\n");
+ //exit(1);
 
 
 while(1){
 
 int count=0;
-unsigned q=rand()&0xffffffff;
+__uint128_t q=0;
 
+for(int i=0;i<4;i++){
+  q<<=32;
+  q^=(rand()&0xffffffff);
+}
+//printf("%llb\n",q);
+//print_uint128(q);
+//exit(1);
 
 vec vx=generate_c(q,o2v(w));
 printpol(vx);
 printf(" ==marrie\n");
+//exit(1);
 paloma_safe(v2o(vx), (w));
-printf("cc%b\n",q);
-
+printf("cc%llb\n",q);
+exit(1);
 yami++;
 printf("kiri=%d\n",yami);
 if(yami==1000)
