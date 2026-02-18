@@ -638,6 +638,31 @@ vec renritu(MTX a, int n)
   return v;
 }
 
+unsigned int oinb(int a, unsigned int n)
+{
+    unsigned int i;
+
+    if (a == 0)
+        return 0;
+    if (a < 0)
+    {
+        //printf("a=%d", a);
+        a = N + a%N;
+        //printf("-a=%d\n", a);
+        // exit(1);
+    }
+    // if (a == 1)
+    //     return 1;
+    for (i = 1; i < n; i++)
+    {
+        if ((i * a) % N == 1)
+            return i;
+    }
+    printf("no return\n");
+    exit(1);
+}
+
+
 // self sankaku
 MTX sankaku(MTX a, int n)
 {
@@ -655,7 +680,7 @@ MTX sankaku(MTX a, int n)
   back:
   for (i = 0; i < n; i++) {
     p = a.x[i][i];
-    a.x[i][i]=(a.x[i][i]*inv(p,N))%N;
+    a.x[i][i]=(a.x[i][i]*oinb(p,N))%N;
     if(p==0){
       vec tmp={0};
       printf("p-e\n");
