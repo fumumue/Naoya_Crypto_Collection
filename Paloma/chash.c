@@ -547,7 +547,7 @@ int mlt(int x, int y)
   if (x == 0 || y == 0)
     return 0;
 
-  return ((x + y - 2) % (M - 1)) + 1;
+  return ((x + y - 2) % (N - 1)) + 1;
 }
 
 int mlt2(int n, int x)
