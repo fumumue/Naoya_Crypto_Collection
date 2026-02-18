@@ -1,4 +1,8 @@
 /* Obtain a backtrace and print it to stdout. */
+
+#include <stddef.h>
+#include <assert.h>
+
 void
 print_trace (void)
 {

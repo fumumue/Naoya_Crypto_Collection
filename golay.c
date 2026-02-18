@@ -311,6 +311,25 @@ int xorshift32(){
 }
 
 
+uint32_t gf2_mul_mod(uint32_t a, uint32_t b, uint32_t mod)
+{
+    uint32_t res = 0;
+
+    while (b) {
+        if (b & 1)
+            res ^= a;
+
+        b >>= 1;
+        a <<= 1;
+
+        // 次数が上がったら mod を取る
+        if (a & (1u << 31))
+            a ^= mod;
+    }
+    return res;
+}
+
+
 unsigned int m(unsigned int y, unsigned int z)
 {
   unsigned int c;

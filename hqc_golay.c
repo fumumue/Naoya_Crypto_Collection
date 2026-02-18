@@ -117,8 +117,32 @@ int deg(vec a)
     return n;
 }
 
+long long gcda(unsigned long long a, unsigned long long b)
+{
+    if(a==0) return b;
+    if(b==0) return a;
 
-unsigned long long  gcd(unsigned long long  a, unsigned long long  b)
+    unsigned long long r;
+
+    while(b != 0)
+    {
+        r = a % b;
+        a = b;
+        b = r;
+        printf("b=%d\n",b);
+    }
+
+    if(a != 1){
+        printf("(a,b) != 1\n");
+        //exit(1);
+        return a;
+        //return a;
+    }
+
+    return 1;
+}
+
+unsigned long long  gcd2(unsigned long long  a, unsigned long long  b)
 {
   int r, tmp;
 
@@ -147,46 +171,63 @@ unsigned long long  gcd(unsigned long long  a, unsigned long long  b)
   if(b!=1)
   {
     printf("(a,b)!=1\n");
-    //return -1;
+    //exit(1);
+    return 0;
   }
 
   return b;
 }
 
 
+long long gcd(long long a, long long b)
+{
+    long long aa=a, bb=b;
+    while (b != 0) {
+         long long r = a % b;
+        a = b;
+        b = r;
+        printf("|b=%lld %lld\n",b,a);
+    }
+    return a;
+}
+
 
 // 整数の逆数
-unsigned long long  inv(unsigned long long  a, unsigned long long  n)
+ long long  inv( long long  a, long long  n)
 {
 
-    a%=N;
     if(a==0)
     return 0;
-    if(gcd(a,n)!=1 ){
-        printf("(a,n)!=1:%lld %lld\n",a,n);
+    long long ll=gcd(a,n);
+    if(ll != 1 ){
+
+        printf("no inv (a,n)!=1:%lld %lld %lld\n",a,n,ll);
         return -1;
     }
-    unsigned long long  d = n;
-    unsigned long long  x = 0;
-    unsigned long long  s = 1;
+     long long  d = n;
+     long long  x = 0;
+     long long  s = 1;
     while (a != 0)
     {
-        unsigned long long  q = d / a;
-        unsigned long long  r = d % a;
+         long long  q = d / a;
+         long long  r = d % a;
         d = a;
         a = r;
-        unsigned long long  t = x - q * s;
+         long long  t = (x - q * s)%n;
         x = s;
         s = t;
     }
-    unsigned long long  gcd = d; // $\gcd(a, n)$
+     long long  gcd = d; // $\gcd(a, n)$
 
+    //return (x % n + n) % n;
     return ((x + n) % (n / d));
 }
 
+
+
 // aに何をかけたらbになるか
- unsigned long long 
-equ( unsigned long long  a,  unsigned long long  b)
+ long long 
+equ( long long  a, long long  b)
 {
     // for(unsigned long long  i=0;i<N;i++)
     if (b == 0)
@@ -196,7 +237,10 @@ equ( unsigned long long  a,  unsigned long long  b)
     if(a==b)
     return 1;
 
-    return (inv(a, N) * b) % N;
+    long long a_inv=inv(a,N);
+    if(a_inv<0) return -1; //{ printf("no inv\n"); exit(1); }
+
+    return (a_inv * b) % N;
 }
 
 //モニック多項式にする
@@ -206,12 +250,38 @@ vec coeff(vec f,  unsigned long long  d)
   vec a, b;
 
   k = deg((f)) + 1;
-  for (i = 0; i < k; i++)
-    f.x[i] = (f.x[i]*inv(d,N))%N;
-
+  int dd=0;
+  for (i = 0; i < k; i++){
+    f.x[i] = (f.x[i]*inv(d,N)+N)%N;
+  }
   return f;
 }
 
+
+oterm vLTdiv_safe(vec f, oterm t)
+{
+    oterm tt = vLT(f);
+    oterm s = {0};
+
+    if(tt.n < t.n) {
+        s.n = 0;
+        s.a = 0;
+    } else {
+        s.n = tt.n - t.n;
+        long long c = equ(t.a, tt.a);
+        if(c < 0) {
+            long long k = inv(t.a, N);
+            if(k < 0) {
+                s.a = -1;  // 逆元なし
+                return s;
+            }
+            c = (tt.a * k) % N;
+        }
+        s.a = c;
+    }
+
+    return s;
+}
 
 // 多項式を単行式で割る
 oterm vLTdiv(vec f, oterm t)
@@ -238,8 +308,16 @@ oterm vLTdiv(vec f, oterm t)
     }
     else if (t.n == 0 && t.a > 0)
     {
-        s.a = (tt.a * inv(t.a, N)) % N;
+        long long k=inv(t.a, N);
+        if(k<0)
+        s.a= -1;
+        if(k>=0)
+        s.a = (tt.a * k) % N;
         s.n = tt.n;
+    }
+    if(s.a<0){
+        printf("%dx^%d\n",s.a,s.n);
+        //exit(1);
     }
 
     return s;
@@ -295,16 +373,19 @@ vec vterml(vec f, oterm t)
     vec h = {0};
 
     // f=convolution(f);
-    // k = deg (o2v(f));
+    int k = deg ((f))+1;
 
-    for (i = 0; i < DEG; i++)
+    for (i = 0; i < k; i++)
     {
         // h.t[i].n = f.t[i].n + t.n;
-        if (f.x[i] > 0)
+        if (f.x[i] > 0){
+            if(t.n+i>=DEG)
+            exit(1);
             h.x[i + t.n] = (f.x[i] * t.a) % N;
+        }
     }
 
-    // h = conv(h);
+     //h = conv(h);
     //  assert(op_verify(h));
     return h;
 }
@@ -359,6 +440,93 @@ vec vmul(vec a, vec b,int R)
 }
 
 
+vec vdiv_safe(vec f, vec g)
+{
+    int i;
+    vec tt = {0};  // 商
+    vec h;
+    oterm b, c;
+    
+    // tt の初期化
+    for (i = 0; i < DEG; i++) tt.x[i] = 0;
+
+    // g が 0 の場合はエラー
+    if (vLT(g).a == 0) {
+        printf("Error: division by zero g\n");
+        exit(1);
+    }
+
+    // f の次数 < g の場合は商は 0
+    if (deg(f) < deg(g)) {
+        return tt;
+    }
+
+    b = vLT(g);  // g の先頭項
+
+    // g が定数 1 の場合は f がそのまま商
+    if (b.a == 1 && b.n == 0) {
+        return f;
+    }
+
+    // 割り算ループ
+    while (deg(f) >= deg(g)) {
+        c = vLTdiv_safe(f, b);  // f の先頭項 ÷ g の先頭項
+
+        // 安全性チェック
+        if (c.n < 0 || c.n >= DEG || c.a <= 0 || c.a > N) {
+            printf("Cannot reduce leading term: c.n=%d, c.a=%lld\n", c.n, c.a);
+            exit(1);
+        }
+        if(c.a<0){
+            printf("vad\n");
+            exit(1);
+        }
+        if(c.n>DEG){
+            printf("cnn\n");
+            exit(1);
+        }
+        if(c.n>DEG)
+        break;
+        tt.x[c.n] = c.a;       // 商に格納
+        h = vterml(g, c);      // c * g を作る
+        f = vsub(f, h);        // f を更新
+
+        // f が 0 になったら終了
+        if (deg(f) < 0) break;
+    }
+
+    return tt;
+}
+
+
+// 多項式を表示する(default)
+void printpoln2(vec a)
+{
+    int i, n,flg=0;
+
+    n = deg(a);
+
+    // printf ("baka\n");
+    //  assert(("baka\n", n >= 0));
+
+    for (i = n; i > -1; i--)
+    {
+        if (a.x[i] != 0)
+        {
+            printf("%d*", a.x[i]);
+            // if (i > 0)
+            printf("x^%d", i);
+            if(i>0)
+            printf("+");
+        }
+    }
+      printf("\n");
+
+    return;
+}
+
+
+
 //多項式の商を取る
 vec vdiv(vec f, vec g)
 {
@@ -366,15 +534,19 @@ vec vdiv(vec f, vec g)
   int i = 0, j, n, k;
   vec h = {0}, e = {0}, tt = {0};
   oterm a, b = {0}, c = {0};
+  vec df={0};
+
+  df.x[0]=-1;
 
   if (vLT(f).n == 0 && vLT(g).a == 0)
   {
-    printf("baka^\n");
+    printf("baka^v\n");
     //return f;
     exit(1);
   }
   if (vLT(g).a == 0)
   {
+    printf("g==0\n");
     exit(1);
   }
   if (vLT(g).n == 0 && vLT(g).a > 1)
@@ -396,6 +568,30 @@ vec vdiv(vec f, vec g)
   }
 
   i = 0;
+  while (deg(f) >= deg(g))
+{
+    c = vLTdiv_safe(f, b);
+    printf("c.n=%d c.a=%lld deg(f)=%d\n", c.n, c.a, deg(f));
+
+    if (c.a <= 0 || c.a > N) {
+        printf("cannot reduce leading term, breaking\n");
+        printpoln(df);
+        return df;
+        //continue;
+        break;
+    }
+
+    assert(c.n < DEG);
+    
+    tt.x[c.n] = c.a;
+
+    h = vterml(g, c);
+    f = vsub(f, h);
+    printpoln(f);
+
+    printf("after vsub: deg(f)=%d\n", deg(f));
+}
+/*
   while (vLT(f).n > 0 && vLT(g).n > 0)
   {
     c = vLTdiv(f, b);
@@ -415,8 +611,9 @@ vec vdiv(vec f, vec g)
     if (c.n == 0)
       break;
   }
+*/
 
-  // tt は逆順に入ってるので入れ替える
+// tt は逆順に入ってるので入れ替える
   return tt;
 }
 

@@ -4,8 +4,8 @@
 //monomial
 typedef struct
 {
-   unsigned int n; //単項式の次数
-   unsigned int a; //単項式の係数
+   int n; //単項式の次数
+   int a; //単項式の係数
 } oterm;
 
 //polynomial
@@ -16,9 +16,9 @@ typedef struct
 
 typedef union
 {
-   unsigned int x[DEG]; //配列の添字を次数に、配列の値を係数に持つ多項式の表現
-   unsigned short a[DEG*2];
-   unsigned char c[DEG*4];
+    int x[DEG]; //配列の添字を次数に、配列の値を係数に持つ多項式の表現
+    short a[DEG*2];
+    char c[DEG*4];
 } vec;
 
 typedef struct {
@@ -45,7 +45,7 @@ typedef struct {
 
 
 typedef struct {
-   int x[N][N+1];
+   int x[10][10];
    vec z[N];
   OP f;
   int row; //行
@@ -61,6 +61,7 @@ typedef struct {
   int col; //列
   int flg;
 } MTA;
+
 
 typedef union {
     unsigned long long int x[K/2];

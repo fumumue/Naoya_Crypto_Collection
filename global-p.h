@@ -5,15 +5,17 @@
 //符号のパラーメータの指定。通常[N,K,T]として、
 //Nは符号の長さ、Kが符号の次元、Tは訂正エラー数
 //を表す。ここではDは符号長にしている。
-#define N 17 // set small prime ex. p=2053
+#define N 3911  // set small prime ex. p=2053
 #define M N // puncture code
-#define K (8) // degree of polynomial
-#define E (5)   // bit size of prime
-#define DEG N*K // set (K * E) < N
+#define K (467) // degree of polynomial
+#define E (12)   // bit size of prime
+#define DEG 1024 // set (K * E) < N
 #define T (K / 2) // weight of error vector
 
-unsigned int mat[N*2][N*E] = {0};
-unsigned int ma[N*2][N*E] = {0};
-int vb[N * 2][N*2] = {0};
-int gt[N * 2][N * 2] = {0};
+
+unsigned int mat[N][N] = {0};
+
+unsigned int ma[N*2][N] = {0};
+int vb[N][N] = {0};
+int gt[N][N] = {0};
 
