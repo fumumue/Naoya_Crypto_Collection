@@ -3210,6 +3210,54 @@ unsigned int to_m(unsigned int y, unsigned int z)
   
 }
 
+void naoya(void){
+
+    int i;
+    vec mm={0},f={0};
+
+    for(i=0;i<129;i++)
+    mm.x[i]=i+1;
+    printf("mm= ");
+    printpoln(mm);
+    vec r=mkpol2(130);
+    vec ma=vadd(r,mm);
+    vec rr=mkpol2(193);
+    vec cd[256]={0};
+    for(i=0;i<194;i++){
+    cd[i].x[1]=1;
+    cd[i].x[0]=rand()%N;
+    }
+    vec ed={0};
+    ed.x[0]=1;
+    vec ra=mkpol2(63);
+    for(i=0;i<194;i++)
+    ed=vmul(ed,cd[i],N);
+    vec pk=vadd(ed,ra);
+    vec ca=vadd(vmul(pk,ma,N),rr);
+    for(i=0;i<194;i++)
+    f.x[i]=trace(ca,-(i+1));
+    vec num={0};
+    vec out={0};
+    for(i=0;i<194;i++)
+    num.x[i]=cd[i].x[0];
+    lagrange_interpolate(&num.x, &f.x,194,&out.x);
+    vec md=vsub(ca,out);
+    vec mc=vdiv(md,ed);
+    vec a=vsub(mc,r);
+    printf("plain=\n");
+    printpoln(a);
+    printf("original=\n");
+    printpoln(mm);
+    printf("\n\n pubkey=\n");
+    printpoln(pk);
+    printf("cipher=\n");
+    printpoln(ca);
+    printf("secret point of eval==\n");
+    printpoln(ed);
+    exit(1);
+    //f.x[i]=trace(mm,i+1);
+
+}
 
 int main()
 {
@@ -3326,6 +3374,9 @@ MTA B={0};
     //(konv(mm));
     //exit(1);
 
+    naoya();
+    exit(1);
+    
     /*
     for(i=0;i<N;i++){
         vc.x[i]=0;
@@ -3342,7 +3393,9 @@ MTA B={0};
     //printpoln(mm);
     //exit(1);
     */
-    for(i=0;i<11;i++)
+
+
+    for(i=0;i<129;i++)
     mm.x[i]=i+1;
     vec cv=vmul(mm,g0,N); //vecky(mm);
     printf("符号語\n");
@@ -3389,58 +3442,7 @@ MTA B={0};
     printf("err= ");
     printpoln(vsub(vx,ans));
     */
-    printf("mm= ");
-    printpoln(mm);
-    vec r=mkpol2(12);
-    vec ma=vadd(r,mm);
-    rr=mkpol2(22);
-    vec cd[100]={0};
-    for(i=0;i<23;i++){
-    cd[i].x[1]=1;
-    cd[i].x[0]=i+1;
-    }
-    vec ed={0};
-    ed.x[0]=1;
-    vec ra=mkpol2(10);
-    for(i=0;i<23;i++)
-    ed=vmul(ed,cd[i],N);
-    vec et={0};
-    et.x[0]=1;
-    for(i=0;i<12;i++)
-    et=vmul(et,cd[i],N);
-    pk=vadd(ed,ra);
-    vec red=vmod(pk,et);
-    printpoln(red);
-    for(i=0;i<12;i++)
-    printf("%d,",trace(red,-(i+1)));
-    vec ca=vadd(vmul(pk,ma,N),rr);
-    for(i=0;i<22;i++)
-    f.x[i]=trace(ca,-(i+1));
-    vec num={0};
-    vec out={0};
-    for(i=0;i<23;i++)
-    num.x[i]=i+1;
-    lagrange_interpolate(&num.x, &f.x,23,&out.x);
-    vec md=vsub(ca,out);
-    vec mc=vdiv(md,ed);
-    vec a=vsub(mc,r);
-    printpoln(a);
-    printpoln(mm);
-    printpoln(pk);
-    printpoln(ed);
-    exit(1);
-    //f.x[i]=trace(mm,i+1);
 
-    printf("word= ");
-    lagrange_interpolate(&num.x, &f.x,10,&out.x);
-    printf("out==");
-    printpoln(out);
-    printf("f= ");
-    printpoln(f);
-    printpoln(mm);
-    
-    //monde(N);
-    exit(1);
 
     //cv.x[0]+=1;
     
@@ -3496,7 +3498,7 @@ MTA B={0};
     for(i=0;i<T;i++)
     cc.x[i]=1;
     printf("AI\n");
-    r=vadd(cc,xv); //zind(vadd(cc,vc));
+    vec r=vadd(cc,xv); //zind(vadd(cc,vc));
     printpoln(r);
     printf("Ah!\n");
     MTX Z={0}; //sankaku(monde(r,N),N);

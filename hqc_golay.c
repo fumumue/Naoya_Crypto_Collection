@@ -420,10 +420,11 @@ vec vmul(vec a, vec b,int R)
 
     k = deg(a);
     l = deg(b);
-
+    printf("%d %d\n",k,l);
+    //exit(1);
     if(l+k>N*2){
         printf("blake %d a=%d b=%d\n",l+k,deg(a),deg(b));
-        //exit(1);
+        exit(1);
     }
     i = 0;
     while (i < k + 1)
