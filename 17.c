@@ -48,7 +48,7 @@ void lagrange_interpolate(const int *xs, const int *ys, int k, int *result) {
 
     for (int i = 0; i < k; i++) {
         // 基底多項式 l_i(x) の分子
-        int numer[64] = {0}; // k が小さい前提
+        int numer[256] = {0}; // k が小さい前提
         numer[0] = 1;
         int numer_deg = 0;
         int denom = 1;
@@ -56,7 +56,7 @@ void lagrange_interpolate(const int *xs, const int *ys, int k, int *result) {
         for (int j = 0; j < k; j++) {
             if (j == i) continue;
 
-            int new_numer[64] = {0};
+            int new_numer[256] = {0};
             for (int d = 0; d <= numer_deg; d++) {
                 int c = numer[d];
                 if (c == 0) continue;
