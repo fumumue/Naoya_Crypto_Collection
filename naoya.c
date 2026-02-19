@@ -3212,35 +3212,56 @@ unsigned int to_m(unsigned int y, unsigned int z)
 
 void naoya(void){
 
-    int i;
+    int i,count=0,cnt=0;
     vec mm={0},f={0};
+    int zk[8192]={0};
 
-    for(i=0;i<129;i++)
-    mm.x[i]=i+1;
+    while(1){
+        cnt=rand()%N;
+        if(zk[cnt]==0){
+        zk[cnt]=1;
+        count++;
+        }
+        if(count>32)
+        break;
+    }
+
+    for(i=0;i<12;i++)
+    mm.x[i]=rand()%N;
     printf("mm= ");
     printpoln(mm);
-    vec r=mkpol2(130);
+    vec r=mkpol2(13);
     vec ma=vadd(r,mm);
-    vec rr=mkpol2(193);
+    vec rr=mkpol2(31);
     vec cd[256]={0};
-    for(i=0;i<194;i++){
+    for(i=0;i<32;i++){
     cd[i].x[1]=1;
-    cd[i].x[0]=rand()%N;
+    //cd[i].x[0]=rand()%N;
     }
+    count=0;
+    for(i=0;i<8192;i++){
+    if(zk[i]>0){
+        cd[count].x[0]=i;
+        count++;
+    }
+    if(count==32)
+    break;
+    }
+    
     vec ed={0};
     ed.x[0]=1;
-    vec ra=mkpol2(63);
-    for(i=0;i<194;i++)
+    vec ra=mkpol2(18);
+    for(i=0;i<32;i++)
     ed=vmul(ed,cd[i],N);
     vec pk=vadd(ed,ra);
     vec ca=vadd(vmul(pk,ma,N),rr);
-    for(i=0;i<194;i++)
+    for(i=0;i<32;i++)
     f.x[i]=trace(ca,-(i+1));
     vec num={0};
     vec out={0};
-    for(i=0;i<194;i++)
+    for(i=0;i<32;i++)
     num.x[i]=cd[i].x[0];
-    lagrange_interpolate(&num.x, &f.x,194,&out.x);
+    lagrange_interpolate(&num.x, &f.x,32,&out.x);
     vec md=vsub(ca,out);
     vec mc=vdiv(md,ed);
     vec a=vsub(mc,r);
@@ -3376,7 +3397,7 @@ MTA B={0};
 
     naoya();
     exit(1);
-    
+
     /*
     for(i=0;i<N;i++){
         vc.x[i]=0;
