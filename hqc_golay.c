@@ -576,7 +576,7 @@ vec vdiv(vec f, vec g)
 
     if (c.a <= 0 || c.a > N) {
         printf("cannot reduce leading term, breaking\n");
-        printpoln(df);
+        //printpoln(df);
         return df;
         //continue;
         break;
@@ -588,7 +588,7 @@ vec vdiv(vec f, vec g)
 
     h = vterml(g, c);
     f = vsub(f, h);
-    printpoln(f);
+    //printpoln(f);
 
     printf("after vsub: deg(f)=%d\n", deg(f));
 }
